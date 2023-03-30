@@ -1,5 +1,5 @@
 # Cryptox
-A local password key chain with AES encryption
+A simple local password key chain with AES encryption
 
 ### Main features - *version 2.0*
 - **Store** new passwords
