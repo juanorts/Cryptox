@@ -13,5 +13,6 @@ A local password key chain with AES encryption
 - Additional security layer using **2FA** (Two-Factor Authentication)
 
 ### Additional notes
-* Data is stored in directory *'Cryptox/.data'* inside a file named 'data.cryptox' *(does not exist by default)*
-* Directory *'Cryptox/.resources'* contains graphics for the application *(do not make any changes to it)*
+* Data is stored in directory *'Cryptox/.data'* inside a file named 'data.cryptox' *(these do not exist by default)*
+* Data directory is meant to be hidden
+* Directory *'Cryptox/resources'* contains graphics for the application *(do not make any changes to it)*
