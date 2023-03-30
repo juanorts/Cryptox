@@ -71,8 +71,8 @@ public class CryptoxGUI extends JFrame {
 		}
 		
 		//	Load images
-		logoPath = new File(".resources/logo.png");
-		rightbgPath = new File(".resources/rightbg.png");
+		logoPath = new File("resources/logo.png");
+		rightbgPath = new File("resources/rightbg.png");
 		setIconImage(new ImageIcon(logoPath.getAbsolutePath()).getImage());
 		
 		
