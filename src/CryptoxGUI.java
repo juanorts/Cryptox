@@ -60,7 +60,7 @@ public class CryptoxGUI extends JFrame {
 		//	Set initial configuration of the main frame: title, size, icon, layout(BorderLayout), centered
 		setResizable(false);
 		setTitle("Cryptox");
-		setSize(550, 410);
+		setSize(550, 400);
 		setLocationRelativeTo(null);
 		getContentPane().setLayout(new BorderLayout(0, 0));
 		
@@ -89,7 +89,7 @@ public class CryptoxGUI extends JFrame {
 		// Button to save a new password
 		JButton bAddPassword = new JButton("Save");
 		bAddPassword.setFont(new Font("Roboto", Font.PLAIN, 13));
-		bAddPassword.setBounds(68, 241, 75, 29);
+		bAddPassword.setBounds(68, 252, 75, 29);
 		pMain.add(bAddPassword);
 		
 		bAddPassword.addActionListener(new ActionListener() {
@@ -148,7 +148,8 @@ public class CryptoxGUI extends JFrame {
 		bGetPassword.setFont(new Font("Roboto", Font.PLAIN, 13));
 		bGetPassword.setBackground(new Color(255, 255, 255));
 		bGetPassword.setForeground(Color.BLACK);
-		bGetPassword.setBounds(254, 52, 75, 29);
+		bGetPassword.setBounds(242, 63, 64, 29);
+		bGetPassword.setVisible(false);
 		pMain.add(bGetPassword);
 		
 		bGetPassword.addActionListener(new ActionListener() {
@@ -182,11 +183,63 @@ public class CryptoxGUI extends JFrame {
 		tPassword = new JTextField();
 		tPassword.setFont(new Font("Roboto", Font.PLAIN, 13));
 		tPassword.setToolTipText("Write new password");
-		tPassword.setBounds(68, 203, 176, 26);
+		tPassword.setBounds(68, 214, 178, 26);
 		tPassword.setVisible(false);
 		tPassword.setEditable(false);
 		pMain.add(tPassword);
 		tPassword.setColumns(10);
+		
+		// Button to delete a selected password
+		JButton bDelete = new JButton("Delete password");
+		bDelete.setForeground(new Color(255, 0, 0));
+		bDelete.setFont(new Font("Roboto", Font.PLAIN, 13));
+		bDelete.setBounds(186, 104, 120, 29);
+		bDelete.setVisible(true);
+		pMain.add(bDelete);
+		
+		bDelete.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				if(!((Password) comboBox.getSelectedItem()).isMasterKey()) {
+					int option = JOptionPane.showConfirmDialog(null, "The password " + ((Password) comboBox.getSelectedItem()).getName() + " will be deleted forever.\nAre you sure?", "Delete password", JOptionPane.YES_NO_OPTION, JOptionPane.PLAIN_MESSAGE);
+					if(option == JOptionPane.YES_OPTION) {
+						passwords.remove(comboBox.getSelectedItem());
+						comboBox.removeItemAt(comboBox.getSelectedIndex());
+						try {
+							try {
+								storeAllPasswords();
+							} catch (InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException
+									| InvalidAlgorithmParameterException | IllegalBlockSizeException
+									| BadPaddingException e1) {
+								// TODO Auto-generated catch block
+								e1.printStackTrace();
+							}
+						} catch (IOException e1) {
+							// TODO Auto-generated catch block
+							e1.printStackTrace();
+						}
+						Thread hilo = new Thread() {
+							
+							@Override
+							public void run() {
+								lInfo.setText("Password deleted");
+								try {
+									sleep(4000);
+								} catch (InterruptedException e) {
+									// TODO Auto-generated catch block
+									e.printStackTrace();
+								}
+								lInfo.setText("");
+							}
+						};
+						hilo.start();
+					}
+				} else {
+					JOptionPane.showInternalMessageDialog(null, "Cannot delete Master Key", "Delete Master Key", JOptionPane.ERROR_MESSAGE);
+				}
+			}
+		});
 		
 		// Combobox to select a password between all stored passwords
         comboBox = new JComboBox<Password>();
@@ -194,8 +247,23 @@ public class CryptoxGUI extends JFrame {
         comboBox.setBackground(new Color(255, 255, 255));
         comboBox.setForeground(new Color(0, 0, 0));
 		comboBox.setToolTipText("Select stored password");
-		comboBox.setBounds(68, 52, 176, 29);
+		comboBox.setBounds(68, 63, 178, 29);
 		pMain.add(comboBox);
+		
+		comboBox.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				Password p = (Password) comboBox.getSelectedItem();
+				if(p.isMasterKey()) {
+					bGetPassword.setVisible(false);
+					bDelete.setVisible(false);
+				} else {
+					bGetPassword.setVisible(true);
+					bDelete.setVisible(true);
+				}
+			}
+		});
 		
 		// Label on the right that contains the logo of Cryptox
 		JLabel rightbg = new JLabel("");
@@ -208,14 +276,14 @@ public class CryptoxGUI extends JFrame {
 			
 			@Override
 			public void mouseClicked(MouseEvent e) {
-				JOptionPane.showInternalMessageDialog(null, "Cryptox 2.0\n\nDeveloped by Juan Orts\n\n2023", "About Cryptox", JOptionPane.PLAIN_MESSAGE);
+				JOptionPane.showInternalMessageDialog(null, "Cryptox 2.0.1\n\nDeveloped by Juan Orts\n\n2023", "About Cryptox", JOptionPane.PLAIN_MESSAGE);
 			}
 		});
 		
 		// Button to edit a selected password
 		JButton bEdit = new JButton("Edit password");
 		bEdit.setFont(new Font("Roboto", Font.PLAIN, 13));
-		bEdit.setBounds(68, 93, 118, 29);
+		bEdit.setBounds(68, 104, 106, 29);
 		pMain.add(bEdit);
 		
 		bEdit.addActionListener(new ActionListener() {
@@ -308,77 +376,25 @@ public class CryptoxGUI extends JFrame {
 			}
 		});
 		
-		// Button to delete a selected password
-		JButton bDelete = new JButton("Delete password");
-		bDelete.setForeground(new Color(255, 0, 0));
-		bDelete.setFont(new Font("Roboto", Font.PLAIN, 13));
-		bDelete.setBounds(196, 93, 133, 29);
-		pMain.add(bDelete);
-		
-		bDelete.addActionListener(new ActionListener() {
-			
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				if(!((Password) comboBox.getSelectedItem()).isMasterKey()) {
-					int option = JOptionPane.showConfirmDialog(null, "The password " + ((Password) comboBox.getSelectedItem()).getName() + " will be deleted forever.\nAre you sure?", "Delete password", JOptionPane.YES_NO_OPTION, JOptionPane.PLAIN_MESSAGE);
-					if(option == JOptionPane.YES_OPTION) {
-						passwords.remove(comboBox.getSelectedItem());
-						comboBox.removeItemAt(comboBox.getSelectedIndex());
-						try {
-							try {
-								storeAllPasswords();
-							} catch (InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException
-									| InvalidAlgorithmParameterException | IllegalBlockSizeException
-									| BadPaddingException e1) {
-								// TODO Auto-generated catch block
-								e1.printStackTrace();
-							}
-						} catch (IOException e1) {
-							// TODO Auto-generated catch block
-							e1.printStackTrace();
-						}
-						Thread hilo = new Thread() {
-							
-							@Override
-							public void run() {
-								lInfo.setText("Password deleted");
-								try {
-									sleep(4000);
-								} catch (InterruptedException e) {
-									// TODO Auto-generated catch block
-									e.printStackTrace();
-								}
-								lInfo.setText("");
-							}
-						};
-						hilo.start();
-					}
-				} else {
-					JOptionPane.showInternalMessageDialog(null, "Cannot delete Master Key", "Delete Master Key", JOptionPane.ERROR_MESSAGE);
-				}
-			}
-		});
-		
 		// Label at the bottom to display actions performed
 		lInfo = new JLabel("");
-		lInfo.setVerticalAlignment(SwingConstants.TOP);
 		lInfo.setBackground(new Color(50, 50, 50));
 		lInfo.setHorizontalAlignment(SwingConstants.CENTER);
 		lInfo.setForeground(new Color(255, 255, 255));
 		lInfo.setFont(new Font("Roboto", Font.BOLD, 16));
-		lInfo.setBounds(0, 347, 550, 34);
+		lInfo.setBounds(0, 347, 550, 26);
 		lInfo.setOpaque(true);
 		pMain.add(lInfo);
 		
 		// Password field to type in new passwords
 		tPasswordHide = new JPasswordField();
-		tPasswordHide.setBounds(68, 204, 176, 26);
+		tPasswordHide.setBounds(68, 214, 178, 26);
 		pMain.add(tPasswordHide);
 		
 		// Button to show the typed in password
 		JButton bShowPass = new JButton("Show");
 		bShowPass.setFont(new Font("Roboto", Font.PLAIN, 13));
-		bShowPass.setBounds(254, 202, 75, 29);
+		bShowPass.setBounds(242, 214, 64, 29);
 		pMain.add(bShowPass);
 		
 		bShowPass.addActionListener(new ActionListener() {
@@ -394,7 +410,7 @@ public class CryptoxGUI extends JFrame {
 		lSelectPass.setForeground(new Color(255, 255, 255));
 		lSelectPass.setFont(new Font("Roboto", Font.PLAIN, 18));
 		lSelectPass.setHorizontalAlignment(SwingConstants.CENTER);
-		lSelectPass.setBounds(68, 24, 238, 29);
+		lSelectPass.setBounds(68, 35, 238, 16);
 		pMain.add(lSelectPass);
 		
 		// Label for the new password
@@ -402,13 +418,13 @@ public class CryptoxGUI extends JFrame {
 		lCreateNew.setHorizontalAlignment(SwingConstants.CENTER);
 		lCreateNew.setForeground(Color.WHITE);
 		lCreateNew.setFont(new Font("Roboto", Font.PLAIN, 18));
-		lCreateNew.setBounds(68, 175, 238, 26);
+		lCreateNew.setBounds(68, 186, 238, 16);
 		pMain.add(lCreateNew);
 		
 		// Button to generate random new passwords
 		JButton bGenerate = new JButton("Generate random");
 		bGenerate.setFont(new Font("Roboto", Font.PLAIN, 13));
-		bGenerate.setBounds(153, 241, 176, 29);
+		bGenerate.setBounds(171, 252, 135, 29);
 		pMain.add(bGenerate);
 		
 		bGenerate.addActionListener(new ActionListener() {
@@ -447,7 +463,7 @@ public class CryptoxGUI extends JFrame {
 		JButton bReset = new JButton("Delete all data");
 		bReset.setForeground(Color.RED);
 		bReset.setFont(new Font("Roboto", Font.PLAIN, 13));
-		bReset.setBounds(68, 307, 120, 29);
+		bReset.setBounds(68, 318, 120, 29);
 		pMain.add(bReset);
 		
 		bReset.addActionListener(new ActionListener() {
@@ -516,7 +532,7 @@ public class CryptoxGUI extends JFrame {
 		b2FA = new JButton("");
 		b2FA.setForeground(new Color(0, 119, 255));
 		b2FA.setFont(new Font("Roboto", Font.BOLD, 13));
-		b2FA.setBounds(200, 307, 129, 29);
+		b2FA.setBounds(200, 318, 106, 29);
 		pMain.add(b2FA);
 		
 		b2FA.addActionListener(new ActionListener() {
@@ -549,7 +565,6 @@ public class CryptoxGUI extends JFrame {
 	
 	// Load the combobox with the stored passwords in the ArrayList
 	public void loadCombobox() {
-		// TODO decrypt name
 		for(Password p : this.passwords) {
 			if(!p.isBase32Secret()) {
 				comboBox.addItem(p);
@@ -598,10 +613,15 @@ public class CryptoxGUI extends JFrame {
 		String base32Secret = TimeBasedOneTimePasswordUtil.generateBase32Secret();
 
 		String keyId = "Cryptox";
-		JLabel lInfo = new JLabel("Scan this QR code with a 2FA app and type in the last generated code");
+		JLabel lInfo = new JLabel("Scan this QR code or copy the code displayed above and type in the current code");
 		JTextField tCode = new JTextField();
-		ImageIcon qr = new ImageIcon(new URL(TimeBasedOneTimePasswordUtil.qrImageUrl(keyId, base32Secret)));
-		Object[] options = {qr, lInfo, tCode};
+		URL qrCodeUrl = new URL(TimeBasedOneTimePasswordUtil.qrImageUrl(keyId, base32Secret));
+		ImageIcon qr = new ImageIcon(qrCodeUrl);
+		
+		JLabel lQrCode = new JLabel(base32Secret);
+		lQrCode.setFont((new Font("Roboto", Font.PLAIN, 25)));
+		lQrCode.setHorizontalAlignment(JLabel.CENTER);
+		Object[] options = {qr, lQrCode, lInfo, tCode};
 		int result = JOptionPane.showConfirmDialog(null, options, "Cryptox", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
 		if (result == JOptionPane.OK_OPTION) {
 			String code = TimeBasedOneTimePasswordUtil.generateCurrentNumberString(base32Secret);
@@ -858,7 +878,7 @@ public class CryptoxGUI extends JFrame {
 						} catch (ClassNotFoundException | IOException e1) {
 							// TODO Auto-generated catch block
 							e1.printStackTrace();
-						} 	// Display the frame and load password into comboBox
+						}
 						
 						break;	// Exit loop
 					} else {	// If it is empty: inform the user that it cannot be empty and reask
@@ -889,7 +909,15 @@ public class CryptoxGUI extends JFrame {
 							| NoSuchPaddingException | InvalidAlgorithmParameterException | IllegalBlockSizeException
 							| BadPaddingException | IOException e1) {
 						incorrectMasterKey = true;
-						JOptionPane.showInternalMessageDialog(null, "Incorrect Master Key", "Login Error", JOptionPane.ERROR_MESSAGE);
+						
+						// Show 2FA input panel to trick intruders
+						lInfo = new JLabel("Type in Two-Factor Authentication (2FA) code");
+						JTextField tCode = new JTextField();
+						Object[] options2 = {lInfo, tCode};
+						
+						result = JOptionPane.showConfirmDialog(null, options2, "Cryptox", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+						JOptionPane.showInternalMessageDialog(null, "Incorrect credentials", "Login Error", JOptionPane.ERROR_MESSAGE);
+						System.exit(0);
 					}
 					
 					if(!incorrectMasterKey) {
@@ -919,7 +947,7 @@ public class CryptoxGUI extends JFrame {
 										}
 									} else {
 										// 2FA code is not valid
-										JOptionPane.showInternalMessageDialog(null, "Incorrect Two-Factor Authentication code", "Two-Factor Authentication Error", JOptionPane.ERROR_MESSAGE);
+										JOptionPane.showInternalMessageDialog(null, "Incorrect credentials", "Login Error", JOptionPane.ERROR_MESSAGE);
 										System.exit(0);
 									}
 								} else if(twoFA == null) { // If CANCEL pressed: stop execution
