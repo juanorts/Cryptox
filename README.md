@@ -10,7 +10,7 @@
 - **Delete all data**
 - Secure the passwords using **AES encryption**
 - Secure access to Cryptox key chain using a **Master Key**
-- Additional security layer using **2-FA** (Two-Factor Authentication): can be configured using QR code or Base32 secret.
+- Additional security layer using **2-FA** (Two-Factor Authentication): *can be configured using QR code or Base32 secret.*
 
 ### Additional notes
 * Data is stored in directory *'Cryptox/.data'* inside a file named 'data.cryptox' *(these do not exist by default)*
