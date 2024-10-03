@@ -54,6 +54,7 @@ public class CryptoxGUI extends JFrame {
 	private File rightbgPath;
 	private JPasswordField tPasswordHide;
 	private JButton b2FA;
+	private JButton bShow2FA;
 	private JLabel lInfo;
 	
 	public CryptoxGUI() {
@@ -88,6 +89,7 @@ public class CryptoxGUI extends JFrame {
 		
 		// Button to save a new password
 		JButton bAddPassword = new JButton("Save");
+		bAddPassword.setToolTipText("Store the new password into the Cryptox keychain.");
 		bAddPassword.setFont(new Font("Roboto", Font.PLAIN, 13));
 		bAddPassword.setBounds(68, 252, 75, 29);
 		pMain.add(bAddPassword);
@@ -145,6 +147,7 @@ public class CryptoxGUI extends JFrame {
 		
 		// Button to copy selected password to clipboard
 		JButton bGetPassword = new JButton("Copy");
+		bGetPassword.setToolTipText("Copy the currently selected password into the clipboard.");
 		bGetPassword.setFont(new Font("Roboto", Font.PLAIN, 13));
 		bGetPassword.setBackground(new Color(255, 255, 255));
 		bGetPassword.setForeground(Color.BLACK);
@@ -191,6 +194,7 @@ public class CryptoxGUI extends JFrame {
 		
 		// Button to delete a selected password
 		JButton bDelete = new JButton("Delete password");
+		bDelete.setToolTipText("Delete the currently selected password.");
 		bDelete.setForeground(new Color(255, 0, 0));
 		bDelete.setFont(new Font("Roboto", Font.PLAIN, 13));
 		bDelete.setBounds(186, 104, 120, 29);
@@ -246,7 +250,7 @@ public class CryptoxGUI extends JFrame {
         comboBox.setFont(new Font("Roboto", Font.PLAIN, 13));
         comboBox.setBackground(new Color(255, 255, 255));
         comboBox.setForeground(new Color(0, 0, 0));
-		comboBox.setToolTipText("Select stored password");
+		comboBox.setToolTipText("Select one password stored in the Cryptox keychain.");
 		comboBox.setBounds(68, 63, 178, 29);
 		pMain.add(comboBox);
 		
@@ -276,12 +280,13 @@ public class CryptoxGUI extends JFrame {
 			
 			@Override
 			public void mouseClicked(MouseEvent e) {
-				JOptionPane.showInternalMessageDialog(null, "Cryptox 2.0.1\n\nDeveloped by Juan Orts\n\n2023", "About Cryptox", JOptionPane.PLAIN_MESSAGE);
+				JOptionPane.showInternalMessageDialog(null, "Cryptox 2.0.2\n\nDeveloped by Juan Orts\n\n2024", "About Cryptox", JOptionPane.PLAIN_MESSAGE);
 			}
 		});
 		
 		// Button to edit a selected password
 		JButton bEdit = new JButton("Edit password");
+		bEdit.setToolTipText("Edit the currently selected password.");
 		bEdit.setFont(new Font("Roboto", Font.PLAIN, 13));
 		bEdit.setBounds(68, 104, 106, 29);
 		pMain.add(bEdit);
@@ -423,6 +428,7 @@ public class CryptoxGUI extends JFrame {
 		
 		// Button to generate random new passwords
 		JButton bGenerate = new JButton("Generate random");
+		bGenerate.setToolTipText("Generate a new password randomly.");
 		bGenerate.setFont(new Font("Roboto", Font.PLAIN, 13));
 		bGenerate.setBounds(171, 252, 135, 29);
 		pMain.add(bGenerate);
@@ -461,6 +467,7 @@ public class CryptoxGUI extends JFrame {
 		
 		// Button to delete all stored data
 		JButton bReset = new JButton("Delete all data");
+		bReset.setToolTipText("Delete all passwords in the Cryptox keychain including the Master Key.");
 		bReset.setForeground(Color.RED);
 		bReset.setFont(new Font("Roboto", Font.PLAIN, 13));
 		bReset.setBounds(68, 318, 120, 29);
@@ -545,11 +552,31 @@ public class CryptoxGUI extends JFrame {
 					try {
 						set2FA();
 					} catch (GeneralSecurityException | IOException e1) {
-						// TODO Auto-generated catch block
 						e1.printStackTrace();
 					}
 				}
 			}
+		});
+		
+		// Button to show Base32 secret and QR code to set 2FA in a new authentication app
+		bShow2FA = new JButton("Show 2FA");
+		bShow2FA.setToolTipText("Show the Base32 secret and QR code to set 2FA in a new authentication app.");
+		bShow2FA.setForeground(new Color(0, 0, 0));
+		bShow2FA.setFont(new Font("Roboto", Font.BOLD, 13));
+		bShow2FA.setBounds(200, 293, 106, 29);
+		pMain.add(bShow2FA);
+		
+		bShow2FA.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				try {
+					show2FA();
+				} catch (IOException e1) {
+					e1.printStackTrace();
+				}
+			}
+			
 		});
 		
 		//	Stop the execution when closing the frame
@@ -612,8 +639,8 @@ public class CryptoxGUI extends JFrame {
 	public void set2FA() throws GeneralSecurityException, IOException {
 		String base32Secret = TimeBasedOneTimePasswordUtil.generateBase32Secret();
 
-		String keyId = "Cryptox";
-		JLabel lInfo = new JLabel("Scan this QR code or copy the code displayed above and type in the current code");
+		String keyId = "Cryptox%202.0";
+		JLabel lInfo = new JLabel("Scan the QR code or copy the code displayed above and type in the current code");
 		JTextField tCode = new JTextField();
 		URL qrCodeUrl = new URL(TimeBasedOneTimePasswordUtil.qrImageUrl(keyId, base32Secret));
 		ImageIcon qr = new ImageIcon(qrCodeUrl);
@@ -652,6 +679,22 @@ public class CryptoxGUI extends JFrame {
 				JOptionPane.showInternalMessageDialog(null, "Incorrect Two-Factor Authentication code, make sure you type in the latest code before it changes", "2FA Error", JOptionPane.ERROR_MESSAGE);
 			}
 		}
+	}
+	
+	// Show Base32 secret and QR code for configuring 2FA in a new authenticator
+	public void show2FA() throws IOException {
+		String base32Secret = get2FA().getPassword();
+		
+		String keyId = "Cryptox%202.0";
+		JLabel lInfo = new JLabel("Scan the QR code or copy the code displayed above");
+		URL qrCodeUrl = new URL(TimeBasedOneTimePasswordUtil.qrImageUrl(keyId, base32Secret));
+		ImageIcon qr = new ImageIcon(qrCodeUrl);
+		
+		JLabel lQrCode = new JLabel(base32Secret);
+		lQrCode.setFont((new Font("Roboto", Font.PLAIN, 25)));
+		lQrCode.setHorizontalAlignment(JLabel.CENTER);
+		Object[] options = {qr, lQrCode, lInfo};
+		JOptionPane.showMessageDialog(null, options, "Cryptox - Showing 2FA", JOptionPane.PLAIN_MESSAGE);
 	}
 	
 	// Load all the passwords from the encrypted file
@@ -805,6 +848,13 @@ public class CryptoxGUI extends JFrame {
 			b2FA.setText("Delete 2FA");
 		} else {
 			b2FA.setText("Set 2FA");
+		}
+		
+		// Set visibility of bShow2FA button
+		if(this.has2FA()) {
+			bShow2FA.setVisible(true);
+		} else {
+			bShow2FA.setVisible(false);
 		}
 		
 		//	Make frame visible

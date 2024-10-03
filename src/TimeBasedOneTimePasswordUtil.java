@@ -472,8 +472,7 @@ public class TimeBasedOneTimePasswordUtil {
 	 */
 	public static String qrImageUrl(String keyId, String secret, int numDigits, int imageDimension) {
 		StringBuilder sb = new StringBuilder(128);
-		sb.append("https://chart.googleapis.com/chart?chs=" + imageDimension + "x" + imageDimension + "&cht=qr&chl="
-				+ imageDimension + "x" + imageDimension + "&chld=M|0&cht=qr&chl=");
+		sb.append("https://qrcode.tec-it.com/API/QRCode?size=small&dpi=200&data=");
 		addOtpAuthPart(keyId, secret, sb, numDigits);
 		return sb.toString();
 	}
